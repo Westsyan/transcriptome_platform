@@ -1,0 +1,375 @@
+@(projectName: Seq[String], proname: String,host:String)(implicit session: Session)
+@fileupload.main("RNA组装和定量分析", projectName, proname,host) {
+
+    <style>
+            label {
+                text-indent: 2em;
+            }
+
+    </style>
+
+    <div class="row-fluid">
+
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+                <div class="portlet blue-soft box">
+
+                    <div class="portlet-title">
+                        <div class="caption">
+                            RNA组装和定量分析
+                        </div>
+                    </div>
+
+                    <div class="portlet-body">
+
+                        <form class="registration-form form-horizontal" id="UpdateForm"
+                        accept-charset="UTF-8">
+
+                            <div class="form-group" style="display: none;">
+                                <div class="col-sm-6 indent">
+                                    <input name="proname" id="proname" class="form-control" value="@proname" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-12">任务名:</label>
+                                <div class="col-sm-4 indent">
+                                    <input name="taskname" id="taskname" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-12">
+                                    Paired or Single-end data?</label>
+                                <div class="col-sm-4 indent">
+                                    <select class="form-control" name="paired_or_single" onchange="singleChange(this)">
+                                        <option value="single">Single-end</option>
+                                        <option value="paired" selected>Paired-end</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div id="pairedValue">
+                                <div class="form-group">
+                                    <label class="col-sm-12">请选择样品:</label>
+                                    <div class="col-sm-4 indent">
+                                        <select name="sample[]" id="samplePE" class="checkbox form-control" multiple style="width: 100%"></select>
+                                    </div>
+                                    <div class="col-sm-2" style="margin-top: 5px;">
+                                        <input type="checkbox" id="checkboxPE" style="float: left">选择所有样品
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="singleValue" style="display: none;">
+                                <div class="form-group">
+                                    <label class="col-sm-12">请选择样品:</label>
+                                    <div class="col-sm-4 indent">
+                                        <select name="sample2[]" id="sampleSE" class="checkbox form-control" multiple style="width: 100%"></select>
+                                    </div>
+                                    <div class="col-sm-4" style="margin-top: 5px;">
+                                        <input type="checkbox" id="checkboxSE" style="float: left">选择所有样品
+                                    </div>
+                                </div>
+
+
+                                    <div class="form-group">
+                                        <label class="col-sm-12 indent-2">
+                                            Strand-specific Library Type</label>
+                                        <div class="col-sm-4 indent-1">
+                                            <select class="form-control" name="library_type">
+                                                <option value="F">F</option>
+                                                <option value="R">R</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                            </div>
+
+
+                            <div class="form-group">
+                                <label class="col-sm-12">
+                                    Run in silico normalization of reads</label>
+                                <div class="col-sm-4 indent">
+                                    <select class="form-control" name="norm">
+                                        <option value="--normalize_reads" selected>Yes</option>
+                                        <option value="">No</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group" >
+                                <label class="col-sm-12">
+                                    Minimum Contig Length:</label>
+                                <div class="col-sm-4 indent">
+                                    <input name="min_contig_length" id="min_contig_length" class="form-control" value="200" />
+                                </div>
+                            </div>
+
+                            <div class="form-group" >
+                                <label class="col-sm-12">
+                                    Minimum count for K-mers to be assembled</label>
+                                <div class="col-sm-4 indent">
+                                    <input name="min_kmer_cov" id="min_kmer_cov" class="form-control" value="1" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-12">
+                                    Abundance estimation method</label>
+                                <div class="col-sm-4 indent">
+                                    <select class="form-control" name="est_method" onchange="estChange(this)">
+                                        <option value="RSEM">RSEM</option>
+                                        <option value="eXpress">eXpress</option>
+                                        <option value="salmon">Salmon</option>
+                                        <option value="kallisto">Kallisto</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group" id="alnValue">
+                                <label class="col-sm-12 indent-2">
+                                    Alignment method</label>
+                                <div class="col-sm-4 indent-1">
+                                    <select class="form-control" name="aln_method">
+                                        <option value="bowtie">Bowtie</option>
+                                        <option value="bowtie2">Bowtie2</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="display: none;" id="idxValue">
+                                <label class="col-sm-12 indent-2">
+                                    Index type</label>
+                                <div class="col-sm-4 indent-1">
+                                    <select class="form-control" name="salmon_idx_type">
+                                        <option value="quasi">Quasi</option>
+                                        <option value="fmd">FMD</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class = "actions indent col-sm-4">
+                                    <button type="button" class="btn btn-primary" style="width: 100%;" id="search" onclick="Running()">
+                                        运行</button>
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+
+
+            $("#sample").select2();
+
+            $("#checkboxPE").click(function () {
+                if ($("#checkboxPE").is(':checked')) {
+                    $("#samplePE > option").prop("selected", "selected");// Select All Options
+                    $("#samplePE").trigger("change");// Trigger change to select 2
+                } else {
+                    $("#samplePE > option").removeAttr("selected");
+                    $("#samplePE").trigger("change");// Trigger change to select 2
+                }
+            });
+
+            $("#checkboxSE").click(function () {
+                if ($("#checkboxSE").is(':checked')) {
+                    $("#sampleSE > option").prop("selected", "selected");// Select All Options
+                    $("#sampleSE").trigger("change");// Trigger change to select 2
+                } else {
+                    $("#sampleSE > option").removeAttr("selected");
+                    $("#sampleSE").trigger("change");// Trigger change to select 2
+                }
+            });
+
+
+            function singleChange(element) {
+                var value = $(element).find(">option:selected").val()
+                if (value == "single") {
+                    $("#pairedValue").hide();
+                    $("#singleValue").show();
+                } else {
+                    $("#singleValue").hide();
+                    $("#pairedValue").show();
+                }
+            }
+
+            function estChange(element) {
+                var value = $(element).find(">option:selected").val()
+                if (value == "RSEM" || value == "eXpress") {
+                    $("#alnValue").show();
+                    $("#idxValue").hide();
+                } else if(value == "salmon"){
+                    $("#alnValue").hide();
+                    $("#idxValue").show();
+                } else{
+                    $("#alnValue").hide();
+                    $("#idxValue").hide();
+                }
+            }
+
+
+            $(function () {
+
+
+                $.ajax({
+                    url: "/transcriptome/sample/getAllPESample?proname=@proname",
+                    type: "get",
+                    success: function (data) {
+                        $("#samplePE").select2(
+                                {
+                                    data: data,
+                                    closeOnSelect: false
+                                }
+                        );
+                    }
+                });
+
+                $.ajax({
+                    url: "/transcriptome/sample/getAllSESample?proname=@proname",
+                    type: "get",
+                    success: function (data) {
+                        $("#sampleSE").select2(
+                                {
+                                    data: data,
+                                    closeOnSelect: false
+                                }
+                        );
+                    }
+                });
+
+
+                $.ajax({
+                    url: "/transcriptome/task/getTime",
+                    type: "GET",
+                    success: function (data) {
+                        $("#taskname").val(data.date + "_Task");
+                    }
+                });
+
+                formValidation();
+            });
+
+
+            function formValidation() {
+                $('#UpdateForm').formValidation({
+                    framework: 'bootstrap',
+                    icon: {
+                        valid: 'glyphicon glyphicon-ok',
+                        invalid: 'glyphicon glyphicon-remove',
+                        validating: 'glyphicon glyphicon-refresh'
+                    },
+                    fields: {
+                        taskname: {
+                            validators: {
+                                notEmpty: {
+                                    message: '不能为空!'
+                                },
+                                regexp: {
+                                    regexp: '^[A-Za-z0-9"_"]{1,25}$',
+                                    message: '25个以内字符，可使用字母、数字、下划线！'
+                                },
+                                stringLength: {
+                                    message: '任务名长度最大为20！',
+                                    max: 20
+                                }
+                            }
+                        },
+                        'sample[]': {
+                            validators: {
+                                callback: {
+                                    message: '请至少选择俩个样品表型！',
+                                    callback: function (value, validator, $field) {
+                                        // Get the selected options
+                                        var options = validator.getFieldElements('sample[]').val();
+                                        return (options != null
+                                                && options.length >= 2);
+                                    }
+                                }
+                            }
+                        },
+                        'sample2[]': {
+                            validators: {
+                                callback: {
+                                    message: '请至少选择俩个样品表型！',
+                                    callback: function (value, validator, $field) {
+                                        // Get the selected options
+                                        var options = validator.getFieldElements('sample2[]').val();
+                                        return (options != null
+                                                && options.length >= 2);
+                                    }
+                                }
+                            }
+                        },
+                        min_contig_length:{
+                            validators: {
+                                notEmpty: {
+                                    message: "不能为空！"
+                                },
+                                between: {
+                                    min: 200,
+                                    max: 99999999999,
+                                    message: "最小值为200！"
+                                }
+                            }
+                        },
+                        min_kmer_cov: {
+                            validators: {
+                                notEmpty: {
+                                    message: "不能为空！"
+                                },
+                                between: {
+                                    min: 1,
+                                    max: 99999999999,
+                                    message: "最小值为1！"
+                                }
+                            }
+                        }
+                    }
+                })
+            }
+
+
+            function Running() {
+                var form = $("#UpdateForm");
+                var fv = form.data("formValidation");
+                fv.validate();
+                var x = $("#otuname").value;
+                console.log(x);
+                if (fv.isValid()) {
+                    var index = layer.load(1, {
+                        shade: [0.1, '#fff']
+                    });
+                    $.ajax({
+                        url: "@routes.TaskController.checkName(proname)",
+                        type: "get",
+                        dataType: "json",
+                        data: $("#UpdateForm").serialize(),
+                        success: function (data) {
+                            if (data.valid == "false") {
+                                $("#remote").show();
+                                layer.close(index);
+                            } else {
+                                $.ajax({
+                                    url: "@routes.TaskController.saveDeploy()",
+                                    type: "post",
+                                    dataType: "json",
+                                    data: $("#UpdateForm").serialize(),
+                                    success: function () {
+                                        window.location.replace("/transcriptome/task/taskPage?proname=@proname")
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+
+    </script>
+}

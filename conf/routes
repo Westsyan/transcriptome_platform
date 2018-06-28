@@ -1,0 +1,89 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+GET           /                                           controllers.LoginController.admin
+
+GET           /home/admin                                 controllers.LoginController.login
+
+GET           /home/sign                                  controllers.LoginController.sign
+
+GET           /home/signSuccess                           controllers.LoginController.signsuccess(account:String,password:String)
+
+GET           /home/toSuccess                             controllers.LoginController.toSuccess
+
+GET           /back/logout                                controllers.LoginController.logout
+
+GET           /back/toIndex                               controllers.LoginController.toIndex(account:String)
+
+
+
+GET           /project/home                               controllers.SampleController.home
+
+GET           /project/uploadFile                         controllers.SampleController.enterHome(projectname:String)
+GET           /project/deployGet                          controllers.SampleController.deployGet(id:Int)
+GET           /project/loadData                           controllers.SampleController.loadData(proname:String)
+
+POST          /projects/checkRef                          controllers.SampleController.checkRef(proname:String)
+
+
+POST          /project/reset                              controllers.SampleController.resetPE
+
+PUT           /project/updateSample                       controllers.SampleController.updateSample
+
+DELETE        /project/deleteSample                       controllers.SampleController.deleteSample(id:Int)
+
+
+
+POST          /home/checkAccount                          controllers.LoginController.checkAccount
+
+GET           /project/addProject                         controllers.ProjectController.addProject
+POST          /project/checkProjectname                   controllers.ProjectController.checkProjectname
+POST          /project/checkNewproname                    controllers.ProjectController.checkNewproname
+DELETE        /project/deleteProject                      controllers.ProjectController.deleteProject(id:Int)
+POST          /project/updateProname                      controllers.ProjectController.updateProname
+POST          /project/updateDescription                  controllers.ProjectController.updateDescription
+
+GET           /project/openLogFile                        controllers.SampleController.openLogFile(id:Int)
+
+POST          /project/checkSample                        controllers.SampleController.checkSample(proname:String)
+
+POST          /project/getAllSample                       controllers.SampleController.getAllSample(proname:String)
+
+
+GET           /transcriptome/sample/toDate                controllers.SampleController.dataPage(proname:String)
+GET           /transcriptome/sample/toSE                  controllers.SampleController.toSE(proname:String)
+POST          /transcriptome/sample/updatePE              controllers.SampleController.uploadPE
+POST          /transcriptome/sample/updateSE              controllers.SampleController.uploadSE
+GET           /transcriptome/sample/downloadPE            controllers.SampleController.downloadPE(id:Int,code:Int)
+GET           /transcriptome/sample/downloadSE            controllers.SampleController.downloadSE(id:Int,code:Int)
+POST          /transcriptome/sample/isRunCmd              controllers.SampleController.isRunCmd(id:Int)
+GET           /transcriptome/sample/deployGet             controllers.SampleController.deployGet(id:Int)
+POST          /transcriptome/sample/resetPE               controllers.SampleController.resetPE
+GET           /transcriptome/sample/getAllPESample        controllers.SampleController.getAllPESample(proname:String)
+GET           /transcriptome/sample/getAllSESample        controllers.SampleController.getAllSESample(proname:String)
+GET           /transcriptome/sample/checkNewsample        controllers.SampleController.checkNewsample(proname:String)
+
+GET           /transcriptome/task/getTime                 controllers.TaskController.getTime
+GET           /transcriptome/task/checkName               controllers.TaskController.checkName(proname:String)
+POST          /transcriptome/task/saveDeploy              controllers.TaskController.saveDeploy
+GET           /transcriptome/task/taskPage                controllers.TaskController.taskPage(proname:String)
+GET           /transcriptome/task/toTaskPage              controllers.TaskController.toTaskPage(proname:String)
+GET           /transcriptome/task/getAllTask              controllers.TaskController.getAllTask(proname:String)
+DELETE        /transcriptome/task/deleteTask              controllers.TaskController.deleteTask(id:Int)
+GET           /transcriptome/task/getLog                  controllers.TaskController.getLog(id:Int)
+GET           /transcriptome/task/download                controllers.TaskController.download(id:Int,code:Int)
+PUT           /transcriptome/task/updateTaskname          controllers.TaskController.updateTaskname
+GET           /transcriptome/task/getDeploy               controllers.TaskController.getDeploy(id:Int)
+PUT           /transcriptome/task/resetTask               controllers.TaskController.resetTask
+PUT           /transcriptome/task/runResetCmd             controllers.TaskController.runResetCmd(id:Int)
+GET           /transcriptome/task/checkNewname            controllers.TaskController.checkNewname(proname:String)
+
+GET           /transcriptome/project/deleteAll            controllers.ProjectController.deleteAll(id:Int)
+
+GET           /otu/project/selected                       controllers.LoginController.selected
+GET           /unix/getDisk                                controllers.LoginController.getDisk
+
+
+# Map static resources from the /public folder to the /assets URL path
+GET           /assets/*file                               controllers.Assets.at(path="/public", file)

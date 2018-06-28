@@ -1,0 +1,591 @@
+@(projectName: Seq[String], proname: String, host: String)(implicit session: Session)
+    @fileupload.main("分析结果", projectName, proname, host) {
+
+        <style>
+                .update {
+                    border-radius: 15px 15px 15px 15px;
+                    background-color: transparent;
+                    color: gray;
+                    border: 0px;
+                }
+
+                .update:hover {
+                    color: gray;
+                    background-color: lightgray;
+                }
+
+                .fastq {
+                    background-color: transparent;
+                    color: gray;
+                    border: 0px;
+                }
+
+                .fastq:hover {
+                    color: black;
+                    text-decoration: underline;
+                }
+
+                .delete {
+                    border-radius: 15px 15px 15px 15px;
+                    background-color: transparent;
+                    color: gray;
+                    border: 0px;
+                }
+
+                .delete:hover {
+                    color: white;
+                    background-color: red;
+                }
+
+                .state {
+                    display: none;
+                }
+
+                .layui-layer-title {
+                    background-color: #428BCA;
+                    height: 55px;
+                }
+
+        </style>
+
+
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+                <div class="portlet blue-madison box">
+
+                    <div class="portlet-title">
+                        <div class="caption">
+                            分析结果
+                        </div>
+                    </div>
+
+
+                    <div class="portlet-body" id="t">
+
+                        <div class="table-responsive" >
+
+                            <table class="display table table-bordered table-hover table-striped" id="table" data-pagination="true" data-search="true"
+                            data-search-align="left" data-page-list="[10, 25, 50, 100]" data-multiple-search="true">
+
+                                <thead>
+                                    <tr>
+                                        <th data-field="taskname" data-sortable="true" id="taskname">任务名</th>
+                                        <th data-field="createdate" data-sortable="true" id="createdata">创建时间</th>
+                                        <th data-field="state" data-sortable="true" id="state">运行状态</th>
+                                        <th data-field="gene_seq" data-sortable="true" id="gene_seq">基因序列条数</th>
+                                        <th data-field="fasta_seq" data-sortable="true" id="fasta_seq">转录本序列条数</th>
+                                        <th data-field="results" data-sortable="false" id="results">结果一览</th>
+                                        <th data-field="operation" data-sortable="false" id="operation">操作</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="rest" class="modal fade modal-margin" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog" style="width: 1000px;">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                        <h4 class="modal-title">
+                            <span id="lblAddTitle" style="font-weight: bold">RNA组装和定量分析参数设置：</span>
+                        </h4>
+                    </div>
+                    <form id="resetForm" data-toggle="validator" class="registration-form form-horizontal">
+                        <div class="modal-body">
+                            <div class="row-fluid">
+
+                                <div class="form-group">
+                                    <label class="col-sm-8">
+                                        样品：
+                                    </label>
+                                    <div class="col-sm-6 indent">
+                                        <input class="form-control" id="samples" name="samples" readonly="readonly" >
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group">
+                                    <label class="col-sm-7">
+                                        Data Type：
+                                    </label>
+                                    <div class="col-sm-6 indent">
+                                        <input class="form-control" id="data_type" name="data_type" readonly="readonly" >
+                                    </div>
+                                </div>
+
+
+                                <div class="col-sm-8" style="display: none;" >
+                                    <div class="form-group">
+                                        <p class="control-label">
+                                            ID：
+                                        </p>
+                                        <input class="form-control" id="taskIds" name="taskIds" readonly="readonly" >
+                                    </div>
+                                </div>
+
+                                <div class="form-group" id="typeValue">
+                                    <p class="col-sm-7">
+                                        Strand-specific Library Type</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="library_type" id="library_type">
+                                            <option value="F">F</option>
+                                            <option value="R">R</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <p class="col-sm-7">
+                                        Run in silico normalization of reads</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="norm" id="norm">
+                                            <option value="--normalize_reads">Yes</option>
+                                            <option value="">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group" >
+                                    <p class="col-sm-7">
+                                        Minimum Contig Length:</p>
+                                    <div class="col-sm-6 indent">
+                                        <input name="min_contig_length" id="min_contig_length" class="form-control" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group" >
+                                    <p class="col-sm-7">
+                                        Minimum count for K-mers to be assembled</p>
+                                    <div class="col-sm-6 indent">
+                                        <input name="min_kmer_cov" id="min_kmer_cov" class="form-control" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <p class="col-sm-7">
+                                        Abundance estimation method</p>
+                                    <div class="col-sm-6 indent">
+                                        <select class="form-control" name="est_method" id="est_method" onchange="estChange(this)">
+                                            <option value="RSEM">RSEM</option>
+                                            <option value="eXpress">eXpress</option>
+                                            <option value="salmon">Salmon</option>
+                                            <option value="kallisto">Kallisto</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group" id="alnValue">
+                                    <p class="col-sm-12 indent">
+                                        Alignment method</p>
+                                    <div class="col-sm-6 indent-1">
+                                        <select class="form-control" name="aln_method" id="aln_method">
+                                            <option value="bowtie">Bowtie</option>
+                                            <option value="bowtie2">Bowtie2</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group" style="display: none;" id="idxValue">
+                                    <p class="col-sm-12 indent">
+                                        Index type</p>
+                                    <div class="col-sm-6 indent-1">
+                                        <select class="form-control" name="salmon_idx_type" id="salmon_idx_type">
+                                            <option value="quasi">Quasi</option>
+                                            <option value="fmd">FMD</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                        <div class="modal-footer bg-info">
+                            <button type="button" class="btn blue" onclick="Running()">运行</button>
+                            <button type="button" class="btn green" data-dismiss="modal">取消</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="logShow" class="modal fade modal-margin" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog" style="width: 1000px;">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                        <h4 class="modal-title">
+                            <span id="lblAddTitle" style="font-weight: bold">日志信息：</span>
+                            <button type="button" class="btn-remove" data-dismiss="modal" ><i class="fa fa-remove"></i></button>
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row-fluid" id="logInfo">
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div id="deleteShow" class="modal fade modal-margin" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="margin-top: 200px;">
+            <div class="modal-dialog" style="width: 400px;">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary">
+                        <h4 class="modal-title" align="center" id="title1">
+                            <span id="deleteTitle" style="font-weight: bold">请确认是否删除任务"
+                                <b id="dtask">
+
+                                </b>"?
+                            </span>
+                        </h4>
+                        <h4 class="modal-title" align="center" id="title2" style="display: none">
+                            <span id="deleteTitle" style="font-weight: bold">删除中...</span>
+                        </h4>
+                        <h4 class="modal-title" align="center" id="title3" style="display: none">
+                            <span id="deleteTitle" style="font-weight: bold">删除成功</span>
+                        </h4>
+                    </div>
+                    <div class="row-fluid" align="center" >
+                        <div id="warn1">
+                            <img src="/assets/images/warning.png">
+                        </div>
+                        <div id="warn2" style="display: none;">
+                            <img src="/assets/images/timg2.gif" style="height: 109px;">
+                        </div>
+                        <div id="warn3" style="display: none;">
+                            <img src="/assets/images/success.png">
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-info">
+                        <div align="center">
+                            <button type="button" class="btn red" onclick="deleteTask(this)" style="width: 100px;" id="btn1">
+                                确定</button>
+                            <button type="button" class="btn green" data-dismiss="modal" style="width: 100px;" id="btn2">
+                                取消</button>
+                            <button type="button" class="btn green" onclick="updateDelete()" style="width: 100px;
+                                display: none;" id="btn3">确定</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="warnShow" class="modal fade modal-margin" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="margin-top: 200px;">
+            <div class="modal-dialog" style="width: 400px;">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary">
+                        <h4 class="modal-title" align="center">
+                            <span id="warnInfo" style="font-weight: bold">
+                            </span>
+                        </h4>
+                    </div>
+                    <div class="row-fluid" align="center" >
+                        <div>
+                            <img src="/assets/images/warning.png">
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-info">
+                        <div align="center">
+                            <button type="button" class="btn green" data-dismiss="modal" style="width: 100px;" >
+                                确定</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+
+
+                $(function () {
+                    tableInformation();
+                    formValidation();
+
+
+                    window.setInterval(function () {
+                        $(".state").each(function (n, value) {
+                            var st = value.value;
+                            if (st == 0) {
+                                updateTable();
+                            }
+                        })
+                    }, 3000);
+
+
+                });
+
+                function estChange(element) {
+                    var value = $(element).find(">option:selected").val()
+                    if (value == "RSEM" || value == "eXpress") {
+                        $("#alnValue").show();
+                        $("#idxValue").hide();
+                    } else if (value == "salmon") {
+                        $("#alnValue").hide();
+                        $("#idxValue").show();
+                    } else {
+                        $("#alnValue").hide();
+                        $("#idxValue").hide();
+                    }
+                }
+
+                function formValidation() {
+                    $('#resetForm').formValidation({
+                        framework: 'bootstrap',
+                        icon: {
+                            valid: 'glyphicon glyphicon-ok',
+                            invalid: 'glyphicon glyphicon-remove',
+                            validating: 'glyphicon glyphicon-refresh'
+                        },
+                        fields: {
+                            min_contig_length: {
+                                validators: {
+                                    notEmpty: {
+                                        message: "不能为空！"
+                                    },
+                                    between: {
+                                        min: 200,
+                                        max: 99999999999,
+                                        message: "最小值为200！"
+                                    }
+                                }
+                            },
+                            min_kmer_cov: {
+                                validators: {
+                                    notEmpty: {
+                                        message: "不能为空！"
+                                    },
+                                    between: {
+                                        min: 1,
+                                        max: 99999999999,
+                                        message: "最小值为1！"
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                function updateTask(obj) {
+                    var name = obj.value;
+                    var id = obj.id;
+                    $("#oldtaskname").empty();
+                    $("#oldtaskname").val(name);
+                    $("#taskId").val(id);
+                    $("#update").modal("show")
+                }
+
+                function sureUpdate() {
+                    var form = $("#updateForm")
+                    var fv = form.data("formValidation")
+                    fv.validate()
+                    if (fv.isValid()) {
+                        var index = layer.load(1, {
+                            shade: [0.1, '#fff']
+                        });
+                        $.ajax({
+                            url: "@routes.TaskController.updateTaskname()",
+                            type: "put",
+                            dataType: "json",
+                            data: $("#updateForm").serialize(),
+                            success: function (data) {
+                                if (data.valid == "true") {
+                                    layer.close(index);
+                                    $("#update").modal("hide")
+                                    cpm("table", "修改成功");
+                                }
+                            }
+                        })
+                    }
+                }
+
+                function restart(obj) {
+                    var id = obj.value;
+                    $.ajax({
+                        url: "/transcriptome/task/getDeploy?id=" + id,
+                        type: "get",
+                        dataType: "json",
+                        success: function (data) {
+                            if (data.valid == "false") {
+                                $("#warnInfo").empty();
+                                $("#warnInfo").append(data.message);
+                                $("#warnShow").modal("show");
+                            } else {
+                                $("#taskIds").val(id);
+                                $("#samples").val(data.sample);
+                                $("#library_type").val(data.library_type);
+                                $("#norm").val(data.norm);
+                                $("#min_contig_length").val(data.min_contig_length);
+                                $("#min_kmer_cov").val(data.min_kmer_cov);
+                                $("#est_method").val(data.est_method);
+                                if (data.est_method == "RSEM" || data.est_method == "eXpress") {
+                                    $("#alnValue").show();
+                                    $("#idxValue").hide();
+                                } else if (data.est_method == "salmon") {
+                                    $("#alnValue").hide();
+                                    $("#idxValue").show();
+                                } else {
+                                    $("#alnValue").hide();
+                                    $("#idxValue").hide();
+                                }
+                                $("#aln_method").val(data.aln_method);
+                                $("#salmon_idx_type").val(data.salmon_idx_type);
+                                if (data.data_type == "paired") {
+                                    $("#typeValue").hide();
+                                } else {
+                                    $("#typeValue").show();
+                                }
+                                $("#data_type").val(data.data_type);
+                                $("#rest").modal("show")
+                            }
+                        }
+                    })
+                }
+
+
+                function openDelete(obj) {
+                    var i = obj.id;
+                    var name = obj.value;
+                    $("#dtask").empty();
+                    $("#dtask").append(name);
+                    $("#btn1").val(i);
+                    deleteBefore();
+                    $("#deleteShow").modal("show");
+
+                }
+
+                function deleteTask(obj) {
+                    var id = obj.value;
+                    deleting();
+                    $.ajax({
+                        url: "/transcriptome/task/deleteTask?id=" + id,
+                        type: "delete",
+                        dataType: "json",
+                        success: function (data) {
+                            if (data == "success") {
+                                deleteAfter();
+                            }
+                        }
+                    });
+                }
+
+                function updateDelete() {
+                    $("#deleteShow").modal("hide");
+                    updateTable();
+                }
+
+                function openLog(obj) {
+                    $("#logInfo").empty();
+                    var id = obj.value;
+                    $.ajax({
+                        url: "/transcriptome/task/getLog?id=" + id,
+                        type: "get",
+                        dataType: "json",
+                        success: function (data) {
+                            $("#logInfo").append(data.log);
+                            $("#logShow").modal("show")
+                        }
+                    })
+                }
+
+                function tableInformation() {
+                    $.ajax({
+                        url: "@routes.TaskController.getAllTask(proname)",
+                        type: "get",
+                        dataType: "json",
+                        success: function (data) {
+                            $('#table').bootstrapTable({data: data});
+                        }
+                    })
+                }
+
+                function updateTable() {
+                    $.ajax({
+                        url: "@routes.TaskController.getAllTask(proname)",
+                        type: "get",
+                        dataType: "json",
+                        success: function (data) {
+                            $("#table").bootstrapTable('load', data);
+                        }
+                    });
+                }
+
+                function Running() {
+                    var form = $("#resetForm")
+                    var fv = form.data("formValidation")
+                    fv.validate()
+                    if (fv.isValid()) {
+                        $.ajax({
+                            url: "@routes.TaskController.resetTask()",
+                            type: "put",
+                            dataType: "json",
+                            data: $("#resetForm").serialize(),
+                            success: function (data) {
+                                if (data.valid == "true") {
+                                    $("#rest").modal("hide");
+                                    updateTable();
+                                    $.ajax({
+                                        url: "/transcriptome/task/runResetCmd?id=" + data.id,
+                                        type: "put"
+                                    })
+                                }
+                            }
+                        })
+                    }
+                }
+
+
+                $("#down-1").click(function () {
+                    $("#set-1").show();
+                    $("#down-1").hide();
+                    $("#up-1").show()
+                });
+
+                $("#up-1").click(function () {
+                    $("#set-1").hide();
+                    $("#down-1").show();
+                    $("#up-1").hide()
+                });
+
+                $("#down-2").click(function () {
+                    $("#set-2").show();
+                    $("#down-2").hide();
+                    $("#up-2").show()
+                });
+
+                $("#up-2").click(function () {
+                    $("#set-2").hide();
+                    $("#down-2").show();
+                    $("#up-2").hide()
+                });
+
+
+                function change(element) {
+                    var value = $(element).find(">option:selected").val()
+                    if (value == "rdp") {
+                        $("#rdp-1").show()
+                        $("#uclust-1").hide()
+                    } else {
+                        $("#rdp-1").hide()
+                        $("#uclust-1").show()
+                    }
+                }
+
+                function change1(element) {
+                    var value = $(element).find(">option:selected").val()
+                    if (value == "rdp") {
+                        $("#rdp-2").show()
+                        $("#uclust-2").hide()
+                    } else {
+                        $("#rdp-2").hide()
+                        $("#uclust-2").show()
+                    }
+                }
+        </script>
+
+
+    }
