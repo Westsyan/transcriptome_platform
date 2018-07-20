@@ -30,7 +30,7 @@ class SampleController @Inject()(admindao: adminDao, projectdao: projectDao, sam
   def enterHome(projectname: String): Action[AnyContent] = Action { implicit request =>
     val userId = request.session.get("id").head.toInt
     val projectId = Await.result(projectdao.getIdByProjectname(userId, projectname), Duration.Inf)
-    val data = new File(Utils.path + "/" + userId + "/" + projectId)
+    val data = new File(Utils.path + "/" + userId + "/" + projectId + "/data")
     val allName = Await.result(projectdao.getAllProject(userId), Duration.Inf)
     if (data.listFiles().size < 2) {
       Redirect(routes.SampleController.loadData(projectname))
@@ -135,8 +135,8 @@ class SampleController @Inject()(admindao: adminDao, projectdao: projectDao, sam
         new File(outPath + "/tmp").mkdir()
         val deploy = mutable.Buffer(row.id, type1, paradata.stepMethod, paradata.adapter.get, paradata.seed_mismatches.getOrElse(2),
           paradata.palindrome_clip_threshold.getOrElse(30), paradata.simple_clip_threshold.getOrElse(10), paradata.trimMethod,
-          paradata.window_size.getOrElse(50), paradata.required_quality.getOrElse(20), paradata.minlenMethod, paradata.minlen.getOrElse(50),
-          paradata.leadingMethod, paradata.leading.getOrElse(3), paradata.trailingMethod, paradata.trailing.getOrElse(3),
+          paradata.window_size.getOrElse(20), paradata.required_quality.getOrElse(20), paradata.minlenMethod, paradata.minlen.getOrElse(35),
+          paradata.leadingMethod, paradata.leading.getOrElse(3), paradata.trailingMethod, paradata.trailing.getOrElse(20),
           paradata.cropMethod, paradata.crop.getOrElse(0), paradata.headcropMethod, paradata.headcrop.getOrElse(0))
 
         FileUtils.writeLines(new File(outPath + "/deploy.txt"), deploy.asJava)
@@ -174,8 +174,8 @@ class SampleController @Inject()(admindao: adminDao, projectdao: projectDao, sam
         new File(outPath + "/tmp").mkdir()
         val deploy = mutable.Buffer(row.id, type1, paradata.stepMethod, paradata.adapter.get, paradata.seed_mismatches.getOrElse(2),
           paradata.palindrome_clip_threshold.getOrElse(30), paradata.simple_clip_threshold.getOrElse(10), paradata.trimMethod,
-          paradata.window_size.getOrElse(50), paradata.required_quality.getOrElse(20), paradata.minlenMethod, paradata.minlen.getOrElse(50),
-          paradata.leadingMethod, paradata.leading.getOrElse(3), paradata.trailingMethod, paradata.trailing.getOrElse(3),
+          paradata.window_size.getOrElse(20), paradata.required_quality.getOrElse(20), paradata.minlenMethod, paradata.minlen.getOrElse(35),
+          paradata.leadingMethod, paradata.leading.getOrElse(3), paradata.trailingMethod, paradata.trailing.getOrElse(20),
           paradata.cropMethod, paradata.crop.getOrElse(0), paradata.headcropMethod, paradata.headcrop.getOrElse(0))
         FileUtils.writeLines(new File(outPath + "/deploy.txt"), deploy.asJava)
         runCmd1(row, "SE")
@@ -202,8 +202,8 @@ class SampleController @Inject()(admindao: adminDao, projectdao: projectDao, sam
     new File(outPath + "/tmp").mkdir()
     val deploy = mutable.Buffer(sampleRow.id, type1, paradata.stepMethod, paradata.adapter.get, paradata.seed_mismatches.getOrElse(2),
       paradata.palindrome_clip_threshold.getOrElse(30), paradata.simple_clip_threshold.getOrElse(10), paradata.trimMethod,
-      paradata.window_size.getOrElse(50), paradata.required_quality.getOrElse(20), paradata.minlenMethod, paradata.minlen.getOrElse(50),
-      paradata.leadingMethod, paradata.leading.getOrElse(3), paradata.trailingMethod, paradata.trailing.getOrElse(3),
+      paradata.window_size.getOrElse(20), paradata.required_quality.getOrElse(20), paradata.minlenMethod, paradata.minlen.getOrElse(35),
+      paradata.leadingMethod, paradata.leading.getOrElse(3), paradata.trailingMethod, paradata.trailing.getOrElse(20),
       paradata.cropMethod, paradata.crop.getOrElse(0), paradata.headcropMethod, paradata.headcrop.getOrElse(0))//69
     FileUtils.writeLines(new File(outPath + "/deploy.txt"), deploy.asJava)
     Ok(Json.obj("valid" -> "true","id" -> sampleRow.id))
@@ -213,14 +213,16 @@ class SampleController @Inject()(admindao: adminDao, projectdao: projectDao, sam
     val outPath = Utils.outPath(row.accountid, row.projectid, row.id)
     val deploy = FileUtils.readLines(new File(outPath, "deploy.txt")).asScala
     val project = Await.result(projectdao.getById(row.projectid),Duration.Inf)
-    val command1 = if(inputType == "PE"){
-      PETrimmomatic(outPath, deploy)
+    val (command1,command2) = if(inputType == "PE"){
+      val fastqc = s"${Utils.toolPath}/FastQC/fastqc ${outPath}/raw.data_1.fastq ${outPath}/raw.data_2.fastq -o ${outPath}/"
+      (PETrimmomatic(outPath, deploy),fastqc)
     }else{
-      SETrimmomatic(outPath, deploy)
+      val fastqc = s"${Utils.toolPath}/FastQC/fastqc ${outPath}/raw.data.fastq -o ${outPath}/"
+      (SETrimmomatic(outPath, deploy),fastqc)
     }
     val command = new ExecCommand
     val tmp = outPath + "/tmp"
-    command.exect(command1,tmp)
+    command.exect(command1,command2,tmp)
     val samples = Await.result(sampledao.getAllSample(row.accountid, row.projectid), Duration.Inf)
     Await.result(projectdao.updateCount(row.projectid, samples.size), Duration.Inf)
     if (command.isSuccess) {
@@ -548,11 +550,14 @@ class SampleController @Inject()(admindao: adminDao, projectdao: projectDao, sam
         if(x.inputType == "PE"){
         s"""
            |<a class="fastq" href="/transcriptome/sample/downloadPE?id=${x.id}&code=1" title="原始数据"><b>${x.sample}</b><b>_1.fastq</b></a>
+           |<a class="fastq" target="_blank" href="/transcriptome/sample/openHtml?id=${x.id}&code=1" title="查看原始数据统计报告"><i class="fa fa-eye"></i></a>,
            |<a class="fastq" href="/transcriptome/sample/downloadPE?id=${x.id}&code=2" title="原始数据"><b>${x.sample}</b><b>_2.fastq</b></a>
+           |<a class="fastq" target="_blank" href="/transcriptome/sample/openHtml?id=${x.id}&code=2" title="查看原始数据统计报告"><i class="fa fa-eye"></i></a>
            """.stripMargin
         }else{
           s"""
-             |<a class="fastq" href="/parametron/sample/downloadSE?id=${x.id}&code=1" title="原始数据"><b>${x.sample}</b><b>.fastq</b></a>
+             |<a class="fastq" href="/transcriptome/sample/downloadSE?id=${x.id}&code=1" title="原始数据"><b>${x.sample}</b><b>.fastq</b></a>
+             |<a class="fastq" target="_blank" href="/transcriptome/sample/openHtml?id=${x.id}&code=1" title="查看原始数据统计报告"><i class="fa fa-eye"></i></a>
            """.stripMargin
         }
 
@@ -562,7 +567,7 @@ class SampleController @Inject()(admindao: adminDao, projectdao: projectDao, sam
       val operation = if (x.state == 1) {
         s"""
            |  <button class="update" onclick="updateSample(this)" value="${x.sample}" id="${x.id}" title="修改样品名"><i class="fa fa-pencil"></i></button>
-           |  <button class="update" onclick="restart(this)" value="${x.id}" title="重新运行"><i class="fa fa-repeat"></i></button>
+           |  <button class="update" onclick="restart(this)" value="${x.id}" title="重新运行质控"><i class="fa fa-repeat"></i></button>
            |  <button class="update" onclick="openLog(this)" value="${x.id}" title="查看日志"><i class="fa fa-file-text"></i></button>
            |  <button class="delete" onclick="openDelete(this)" value="${x.sample}" id="${x.id}" title="删除样品"><i class="fa fa-trash"></i></button>
            """.stripMargin
@@ -577,6 +582,23 @@ class SampleController @Inject()(admindao: adminDao, projectdao: projectDao, sam
     }
     json
 
+  }
+
+
+
+  def openHtml(id: Int, code: Int) = Action { implicit request =>
+    val row = Await.result(sampledao.getAllById(id), Duration.Inf)
+    val path = Utils.outPath(row.accountid, row.projectid, id)
+    val html = if (row.inputType == "PE") {
+      if (code == 1) {
+        FileUtils.readLines(new File(path, "raw.data_1_fastqc.html")).asScala
+      } else {
+        FileUtils.readLines(new File(path, "raw.data_2_fastqc.html")).asScala
+      }
+    } else {
+      FileUtils.readLines(new File(path, "raw.data_fastqc.html")).asScala
+    }
+    Ok(html.mkString("\n")).as(HTML)
   }
 
   def getAllPESample(proname:String) = Action.async{implicit request=>

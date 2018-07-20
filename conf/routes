@@ -63,6 +63,8 @@ POST          /transcriptome/sample/resetPE               controllers.SampleCont
 GET           /transcriptome/sample/getAllPESample        controllers.SampleController.getAllPESample(proname:String)
 GET           /transcriptome/sample/getAllSESample        controllers.SampleController.getAllSESample(proname:String)
 GET           /transcriptome/sample/checkNewsample        controllers.SampleController.checkNewsample(proname:String)
+GET           /transcriptome/sample/openHtml              controllers.SampleController.openHtml(id:Int,code:Int)
+
 
 GET           /transcriptome/task/getTime                 controllers.TaskController.getTime
 GET           /transcriptome/task/checkName               controllers.TaskController.checkName(proname:String)
@@ -82,7 +84,7 @@ GET           /transcriptome/task/checkNewname            controllers.TaskContro
 GET           /transcriptome/project/deleteAll            controllers.ProjectController.deleteAll(id:Int)
 
 GET           /otu/project/selected                       controllers.LoginController.selected
-GET           /unix/getDisk                                controllers.LoginController.getDisk
+GET           /unix/getDisk                               controllers.LoginController.getDisk
 
 
 # Map static resources from the /public folder to the /assets URL path

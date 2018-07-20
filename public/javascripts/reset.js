@@ -70,10 +70,12 @@ function restart(obj) {
                 $("#pe").show();
                 $("#se").hide();
                 $("#adapter_pe").val(data.adapter);
+                $("#trim_type").text("Trimmomatic PE(paired-end)(质控参数设置):");
             }else{
                 $("#pe").hide();
                 $("#se").show();
                 $("#adapter_se").val(data.adapter);
+                $("#trim_type").text("Trimmomatic SE(single-end)(质控参数设置):");
             }
             $("#rest").modal("show")
 

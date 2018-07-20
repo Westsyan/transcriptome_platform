@@ -89,6 +89,7 @@ object Utils {
   }
 
 
+
   val windowsPath = "F:/platform/transcriptome_platform"
   val linuxPath = "/mnt/sdb/platform/transcriptome_platform"
   val path = {

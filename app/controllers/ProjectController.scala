@@ -38,7 +38,10 @@ class ProjectController  @Inject()(admindao: adminDao,projectdao:projectDao,samp
     val project = ProjectRow(0,accId,projectname,description,date,0)
     Await.result(projectdao.addProject(Seq(project)),Duration.Inf)
     val proId = Await.result(projectdao.getIdByProjectname(accId,projectname),Duration.Inf)
-    new File(Utils.path + "/" + accId + "/" + proId).mkdirs()
+
+    val path = Utils.path + "/" + accId + "/" + proId
+    new File(path + "/data").mkdirs()
+    new File(path + "/task").mkdirs()
 
     Ok(Json.obj("valid" -> "true"))
   }
@@ -150,9 +153,10 @@ class ProjectController  @Inject()(admindao: adminDao,projectdao:projectDao,samp
   }
 
   def deleteAll(id:Int)= Action{implicit request=>
-    val user = request.session.get("user").getOrElse("null")
+    val user = request.session.get("admin").getOrElse("null")
     val userid = request.session.get("id").getOrElse("0")
     if(user == "admin" && userid == "1") {
+      println(id)
       val run = Future {
         Await.result(taskdao.deleteByUserid(id), Duration.Inf)
         Await.result(sampledao.deleteByUserid(id), Duration.Inf)

@@ -142,7 +142,7 @@
                 <div class="modal-header bg-primary">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
                     <h4 class="modal-title">
-                        <span id="lblAddTitle" style="font-weight: bold">质控参数设置：</span>
+                        <span id="lblAddTitle" style="font-weight: bold">重新运行质控：</span>
                     </h4>
                 </div>
                 <form id="resetPEForm" data-toggle="validator" class="registration-form form-horizontal">
@@ -170,7 +170,7 @@
 
 
                             <div class="form-group">
-                                <label class="col-sm-6">Trimmomatic (质控参数设置)</label>
+                                <label class="col-sm-6" id="trim_type"></label>
                                 <label class="col-sm-1">
                                     <a id="down-1" style="margin-left: 2em">
                                         <i class="fa fa-arrow-down"></i>
@@ -190,7 +190,7 @@
                                     <div class="col-sm-6 indent">
                                         <select class="form-control" name="encondingType" id="encondingType">
                                             <option value="-phred64">Illumina 1.3-1.7 Phred+64</option>
-                                            <option value="-phred33" selected>Illumina 1.8+ Phred+33</option>
+                                            <option value="-phred33">Illumina 1.8+ Phred+33</option>
                                         </select>
                                     </div>
                                 </div>
@@ -210,7 +210,7 @@
                                     <div class="form-group" id="pe">
                                         <p class="col-sm-7 indent">Adapter sequences to use:</p>
                                         <div class="col-sm-6 indent-1">
-                                            <select class="form-control" name="adapter" id="adapter">
+                                            <select class="form-control" name="adapter" id="adapter_pe">
                                                 <option value="TruSeq2-PE.fa">
                                                     TruSeq2 (paired-ended, for Illumina GAII)</option>
                                                 <option value="TruSeq3-PE.fa">
@@ -223,9 +223,9 @@
                                     </div>
 
                                     <div class="form-group" id="se">
-                                        <label class="col-sm-7 indent">Adapter sequences to use:</label>
+                                        <p class="col-sm-7 indent">Adapter sequences to use:</p>
                                         <div class="col-sm-6 indent-1">
-                                            <select class="form-control" name="adapter" id="adapter">
+                                            <select class="form-control" name="adapter" id="adapter_se">
                                                 <option value="TruSeq2-SE.fa">
                                                     TruSeq2 (single-ended, for Illumina GAII)</option>
                                                 <option value="TruSeq3-SE.fa">

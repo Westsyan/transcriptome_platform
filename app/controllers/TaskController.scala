@@ -70,7 +70,6 @@ class TaskController @Inject()(admindao: adminDao, projectdao: projectDao, sampl
       val task = Await.result(taskdao.getAllByPosition(ses._1, ses._2, taskname), Duration.Inf)
       val taskpath = Utils.taskPath(ses._1, ses._2, task.id)
       new File(taskpath).mkdirs()
-
       val method = data.paired_or_single
       val strand = data.est_method
 
@@ -118,9 +117,9 @@ class TaskController @Inject()(admindao: adminDao, projectdao: projectDao, sampl
   }
 
   def cmd1(path: String, deploy: mutable.Buffer[String]) : String = {
-    val command = s"${Utils.toolPath}/trinityrnaseq-Trinity-v2.5.1/Trinity --seqType fq --max_memory 50G --samples_file " +
-      s"${path}/sample.txt --SS_lib_type ${deploy(4)} --output ${path}/trinity_tmp ${deploy(5)} --min_contig_length " +
-      s"${deploy(6)} --min_kmer_cov ${deploy(7)} --CPU 12 --no_version_check"
+    val command = s"${Utils.toolPath}/trinityrnaseq-Trinity-v2.5.1/Trinity --seqType fq --max_memory 100G --samples_file " +
+      s"${path}/sample.txt  --output ${path}/trinity_tmp ${deploy(5)} --min_contig_length " +
+      s"${deploy(6)} --min_kmer_cov ${deploy(7)} --CPU 6 --no_version_check"
     command
   }
 
@@ -187,13 +186,14 @@ class TaskController @Inject()(admindao: adminDao, projectdao: projectDao, sampl
 
     val command1 = cmd1(path,deploy)
     val command2 = cmd2(path,deploy)
-    val command3 = cmd3(0,deploy)
+  //  val command3 = cmd3(0,deploy)
 
     val command = new ExecCommand
     val tmp = path + "/tmp"
     new File(tmp).mkdir()
-    command.exect(command1,command2,command3, tmp)
+    command.exect(command1,command2, tmp)
     if (command.isSuccess) {
+      fpkm(deploy(12).split(" "),deploy(13).split(","),path,deploy(8))
       dealwithFile(id)
       val log = command.getErrStr
       FileUtils.writeStringToFile(new File(path, "log.txt"), log)
@@ -216,12 +216,47 @@ class TaskController @Inject()(admindao: adminDao, projectdao: projectDao, sampl
     val genes_size = fasta.map(_.split("\t").head).distinct.size
     FileUtils.moveFile(new File(path + "/trinity_tmp/Trinity.fasta"),new File(path,"Trinity.fasta"))
     dealFasta.getValidFasta(path + "/Trinity.fasta" , path + "/unigene.fasta")
-    FileUtils.moveFile(new File(path + "/tmp/genes.counts.matrix"),new File(path,"genes.counts_table.txt"))
-    FileUtils.moveFile(new File(path + "/tmp/genes.TPM.not_cross_norm"),new File(path,"genes.tpm_table.txt"))
+  //  FileUtils.moveFile(new File(path + "/tmp/genes.counts.matrix"),new File(path,"genes.counts_table.txt"))
+   // FileUtils.moveFile(new File(path + "/tmp/genes.TPM.not_cross_norm"),new File(path,"genes.tpm_table.txt"))
     FileUtils.deleteDirectory(new File(path,"tmp"))
     FileUtils.deleteDirectory(new File(path,"trinity_tmp"))
     val row = TaskRow(id,task.taskname,task.accountid,task.projectid,task.createdata,1,genes_size,trinity_size)
     Await.result(taskdao.updateTask(row,id),Duration.Inf)
+  }
+
+  def fpkm(paths:Array[String],samples:Array[String],path:String,t:String)= {
+    val array =
+      if(t == "RSEM"){
+        paths.map{x=>
+          val file = FileUtils.readLines(new File(x)).asScala
+          val fpkm = file.map(_.split("\t").last)
+          val count = file.map(_.split("\t")(4))
+          val ids = file.map(_.split("\t").head)
+          (fpkm,count,ids)
+        }
+      }else{
+        paths.map{x=>
+          val file = FileUtils.readLines(new File(x)).asScala
+          val fpkm = file.map(_.split("\t")(10))
+          val count = file.map(_.split("\t")(7))
+          val ids = file.map(_.split("\t")(1))
+          (fpkm,count,ids)
+        }
+      }
+    val id = array.map(_._3).head
+    val count = array.map(_._1)
+    val fpk = array.map(_._2)
+    var counts = id
+    var fpks = id
+    for(i <- 0 until  count.size){
+      counts = counts.zip(count(i)).map(x=>(x._1+"\t"+x._2))
+      fpks = fpks.zip(fpk(i)).map(x=>(x._1+"\t"+x._2))
+    }
+    val head = "id\t" + samples.mkString("\t")
+    counts = head +: counts.drop(1)
+    fpks = head +: fpks.drop(1)
+    FileUtils.writeLines(new File(path + "/genes.counts_table.txt") ,counts.asJava)
+    FileUtils.writeLines(new File(path + "/genes.fpkm_table.txt") ,fpks.asJava)
   }
 
   def getAllTask(proname: String) = Action { implicit request =>
@@ -257,9 +292,9 @@ class TaskController @Inject()(admindao: adminDao, projectdao: projectDao, sampl
       val results = if (x.state == 1) {
         s"""
            |<a class="fastq" href="/transcriptome/task/download?id=${x.id}&code=1" title="基因 reads count 矩阵"><b>genes.counts_table.txt</b></a>,&nbsp;
-           |<a class="fastq" href="/transcriptome/task/download?id=${x.id}&code=2" title="基因 fpkm 矩阵"><b>genes.tpm_table.txt</b></a>,&nbsp;
-           |<a class="fastq" href="/transcriptome/task/download?id=${x.id}&code=3" title="原始组装结果"><b>Trinity.fasta</b></a>,&nbsp;
-           |<a class="fastq" href="/transcriptome/task/download?id=${x.id}&code=4" title="unigene组装结果"><b>unigene.fasta</b></a>,&nbsp;
+           |<a class="fastq" href="/transcriptome/task/download?id=${x.id}&code=2" title="基因 fpkm 矩阵"><b>genes.fpkm_table.txt</b></a>,&nbsp;
+           |<a class="fastq" href="/transcriptome/task/download?id=${x.id}&code=3" title="原始组装结果"><b>isoform.fasta</b></a>,&nbsp;
+           |<a class="fastq" href="/transcriptome/task/download?id=${x.id}&code=4" title="unigene组装结果"><b>unigene.fasta</b></a>&nbsp;
            """.stripMargin
       } else {
         ""
@@ -321,9 +356,9 @@ class TaskController @Inject()(admindao: adminDao, projectdao: projectDao, sampl
     val (file, name) = if (code == 1) {
       (new File(path, "genes.counts_table.txt"), "genes.counts_table.txt")
     } else if (code == 2) {
-      (new File(path, "genes.tpm_table.txt"), "genes.tpm_table.txt")
+      (new File(path, "genes.fpkm_table.txt"), "genes.fpkm_table.txt")
     } else if (code == 3) {
-      (new File(path, "Trinity.fasta"), "Trinity.fasta")
+      (new File(path, "Trinity.fasta"), "isoform.fasta")
     } else {
       (new File(path, "unigene.fasta"), "unigene.fasta")
     }

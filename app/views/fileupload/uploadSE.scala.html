@@ -47,7 +47,10 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label class="col-sm-4">Trimmomatic SE(single)(质控参数设置)</label>
+                                    <label class="col-sm-4">Trimmomatic SE(single-end)(质控参数设置):
+                                        <a onclick="openHelp()"  title="帮助文档" class="helpIcon">
+                                            <i class="fa fa-question-circle-o"></i></a>
+                                    </label>
                                     <div class="col-sm-1">
                                         <a id="down-1" style="margin-left: 2em">
                                             <i class="fa fa-arrow-down"></i>
@@ -95,7 +98,7 @@
                                                     <select class="form-control" name="adapter">
                                                         <option value="TruSeq2-SE.fa">
                                                             TruSeq2 (single-ended, for Illumina GAII)</option>
-                                                        <option value="TruSeq3-SE.fa">
+                                                        <option value="TruSeq3-SE.fa" selected>
                                                             TruSeq3 (single-ended, for MiSeq and HiSeq)</option>
                                                     </select>
                                                 </div>
@@ -153,7 +156,7 @@
                                                 Number of bases to average across:</p>
                                             <div class="col-sm-12 indent-1">
                                                 <div class="col-sm-4">
-                                                    <input name="window_size" id="window_size" class="form-control" value="50" />
+                                                    <input name="window_size" id="window_size" class="form-control" value="20" />
                                                 </div>
                                             </div>
                                         </div>
@@ -188,7 +191,7 @@
                                                 Minimum length of reads to be kept:</p>
                                             <div class="col-sm-12 indent-1">
                                                 <div class="col-sm-4">
-                                                    <input name="minlen" id="minlen" class="form-control" value="50" />
+                                                    <input name="minlen" id="minlen" class="form-control" value="35" />
                                                 </div>
                                             </div>
                                         </div>
@@ -238,7 +241,7 @@
                                                 Minimum quality required to keep a base:</p>
                                             <div class="col-sm-12 indent-1">
                                                 <div class="col-sm-4">
-                                                    <input name="trailing" id="trailing" class="form-control" value="3" />
+                                                    <input name="trailing" id="trailing" class="form-control" value="20" />
                                                 </div>
                                             </div>
                                         </div>
@@ -312,6 +315,76 @@
             </div>
         </div>
 
+    <div id="helpShow" class="modal fade modal-margin" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 1000px;">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                    <h4 class="modal-title">
+                        <span id="lblAddTitle" style="font-weight: bold">帮助文档：</span>
+                        <button type="button" class="btn-remove" data-dismiss="modal" ><i class="fa fa-remove"></i></button>
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row-fluid" id="logInfo">
+                        <p class="helpClass">
+                            分析模块封装了Trimmomatic工具，Trimmomatic是一个针对Illumina高通量测序的reads trim工具，支持paired-end（双末端）和single-end（单末端）数据。</p>
+
+                        <p class="helpClass">Trimmomatic包括如下功能：</p>
+
+                        <p class="helpClass"><strong>ILLUMINACLIP:</strong>
+                            Cut adapter and other illumina-specific sequences from the read</p>
+
+                        <p class="helpClass"><strong>SLIDINGWINDOW:</strong>
+                            Perform a sliding window trimming, cutting once the average quality within the window falls below a threshold</p>
+
+                        <p class="helpClass"><STRONG>MINLEN:</STRONG> Drop the read if it is below a specified length</p>
+
+                        <p class="helpClass"><strong>LEADING:</strong>
+                            Cut bases off the start of a read, if below a threshold quality</p>
+
+                        <p class="helpClass"><strong>TRAILING:</strong>
+                            Cut bases off the end of a read, if below a threshold quality</p>
+
+                        <p class="helpClass"><strong>CROP:</strong> Cut the read to a specified length</p>
+
+                        <p class="helpClass"><strong>HEADCROP:</strong>
+                            Cut the specified number of bases from the start of the read</p>
+                        <br>
+                        <p class="helpClass">输入</p>
+                        <br>
+                        <p class="helpClass">对于single-end（单末端）数据，输入单个FASTQ文件。</p>
+
+                        <p class="helpClass">对于paired-end（双末端）数据，输入两个FASTQ文件（R1和R2）。</p>
+                        <br>
+                        <p class="helpClass">设置质量值参数， Illumina 1.3-1.7 Phred+64 对应Illumina早期平台，Illumina 1.8+ Phred+33 对应Illumina最新平台，默认参数为：Illumina 1.8+ Phred+33。</p>
+                        <br>
+                        <p class="helpClass">附录：</p>
+                        <br>
+                        <p class="helpClass">对于常规的RNA或DNA测序，HiSeq4000或HiSeqXTen平台，PE100或PE150，建议使用如下参数设置：</p>
+                        <p class="helpClass">Perform initial ILLUMINACLIP step：Yes</p>
+                        <p class="helpClass">Maximum mismatch count which will still allow a full match to be performed：2</p>
+                        <p class="helpClass">How accurate the match between the two 'adapter ligated' reads must be for PE palindrome read alignment：30</p>
+                        <p class="helpClass">How accurate the match between any adapter etc. sequence must be against a read：10</p>
+                        <p class="helpClass">Perform Sliding window trimming (SLIDINGWINDOW)：Yes</p>
+                        <p class="helpClass">Number of bases to average across：20</p>
+                        <p class="helpClass">Average quality required：20</p>
+                        <p class="helpClass">Drop reads below a specified length (MINLEN)：Yes</p>
+                        <p class="helpClass">Minimum length of reads to be kept：35</p>
+                        <p class="helpClass">Cut bases off the end of a read, if below a threshold quality (TRAILING)：Yes</p>
+                        <p class="helpClass">Minimum quality required to keep a base：20</p>
+                        <p class="helpClass">即，去接头污染，比对允许的最大错配数为2，palindrome模式下匹配碱基数阈值为30，simple模式下的匹配碱基数阈值为10。过滤read尾部质量值20以下的碱基，设置20bp的窗口，如果窗口内的平均质量值低于20，从窗口开始截去后端碱基，过滤质控后35bp以下的read。</p>
+                        <br>
+                        <p class="helpClass">分析模块引用了Trimmomatic v0.32 软件(
+                            <a target="_blank" href="http://www.usadellab.org/cms/index.php?page=trimmomatic">http://www.usadellab.org/cms/index.php?page=trimmomatic</a> )。</p>
+                        <br>
+                        <p class="helpClass">相关文献如下所示：</p>
+                        <p class="helpClass">Bolger, A.M., Lohse, M., &amp; Usadel, B. (2014). Trimmomatic: A flexible trimmer for Illumina Sequence Data. Bioinformatics, btu170.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
         <script>
 
@@ -319,6 +392,11 @@
                 $(function () {
                     formValidation();
                 })
+
+                function openHelp() {
+                    $("#helpShow").modal("show")
+                }
+
 
                 function formValidation() {
                     $('#UpdateForm').formValidation({
@@ -479,6 +557,7 @@
                     $("#down-1").show();
                     $("#up-1").hide()
                 });
+
 
 
                 function stepChange(element) {

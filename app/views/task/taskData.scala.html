@@ -91,7 +91,7 @@
                     <div class="modal-header bg-primary">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
                         <h4 class="modal-title">
-                            <span id="lblAddTitle" style="font-weight: bold">RNA组装和定量分析参数设置：</span>
+                            <span id="lblAddTitle" style="font-weight: bold">重新运行RNA组装和定量分析：</span>
                         </h4>
                     </div>
                     <form id="resetForm" data-toggle="validator" class="registration-form form-horizontal">
@@ -100,7 +100,7 @@
 
                                 <div class="form-group">
                                     <label class="col-sm-8">
-                                        样品：
+                                        样品信息：
                                     </label>
                                     <div class="col-sm-6 indent">
                                         <input class="form-control" id="samples" name="samples" readonly="readonly" >
@@ -127,7 +127,7 @@
                                     </div>
                                 </div>
 
-                                <div class="form-group" id="typeValue">
+                                <div class="form-group" id="typeValue" style="display: none">
                                     <p class="col-sm-7">
                                         Strand-specific Library Type</p>
                                     <div class="col-sm-6 indent">
@@ -143,8 +143,8 @@
                                         Run in silico normalization of reads</p>
                                     <div class="col-sm-6 indent">
                                         <select class="form-control" name="norm" id="norm">
-                                            <option value="--normalize_reads">Yes</option>
-                                            <option value="">No</option>
+                                            <option value="">Yes</option>
+                                            <option value="--no_normalize_reads">No</option>
                                         </select>
                                     </div>
                                 </div>
@@ -172,16 +172,16 @@
                                         <select class="form-control" name="est_method" id="est_method" onchange="estChange(this)">
                                             <option value="RSEM">RSEM</option>
                                             <option value="eXpress">eXpress</option>
-                                            <option value="salmon">Salmon</option>
-                                            <option value="kallisto">Kallisto</option>
+                                 @*           <option value="salmon">Salmon</option>
+                                            <option value="kallisto">Kallisto</option>*@
                                         </select>
                                     </div>
                                 </div>
 
                                 <div class="form-group" id="alnValue">
-                                    <p class="col-sm-12 indent">
+                                    <p class="col-sm-7">
                                         Alignment method</p>
-                                    <div class="col-sm-6 indent-1">
+                                    <div class="col-sm-6 indent">
                                         <select class="form-control" name="aln_method" id="aln_method">
                                             <option value="bowtie">Bowtie</option>
                                             <option value="bowtie2">Bowtie2</option>

@@ -1,5 +1,5 @@
-@(projectName: Seq[String], proname: String,host:String)(implicit session: Session)
-@fileupload.main("RNA组装和定量分析", projectName, proname,host) {
+@(projectName: Seq[String], proname: String, host: String)(implicit session: Session)
+@fileupload.main("RNA组装和定量分析", projectName, proname, host) {
 
     <style>
             label {
@@ -73,69 +73,108 @@
                                 </div>
 
 
-                                    <div class="form-group">
-                                        <label class="col-sm-12 indent-2">
-                                            Strand-specific Library Type</label>
-                                        <div class="col-sm-4 indent-1">
-                                            <select class="form-control" name="library_type">
-                                                <option value="F">F</option>
-                                                <option value="R">R</option>
-                                            </select>
-                                        </div>
+                                <div class="form-group" style="display: none;">
+                                    <label class="col-sm-12 indent-2">
+                                        Strand-specific Library Type</label>
+                                    <div class="col-sm-4 indent-1">
+                                        <select class="form-control" name="library_type">
+                                            <option value="F" selected>F</option>
+                                            <option value="R">R</option>
+                                        </select>
                                     </div>
-                            </div>
-
-
-                            <div class="form-group">
-                                <label class="col-sm-12">
-                                    Run in silico normalization of reads</label>
-                                <div class="col-sm-4 indent">
-                                    <select class="form-control" name="norm">
-                                        <option value="--normalize_reads" selected>Yes</option>
-                                        <option value="">No</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="form-group" >
-                                <label class="col-sm-12">
-                                    Minimum Contig Length:</label>
-                                <div class="col-sm-4 indent">
-                                    <input name="min_contig_length" id="min_contig_length" class="form-control" value="200" />
-                                </div>
-                            </div>
-
-                            <div class="form-group" >
-                                <label class="col-sm-12">
-                                    Minimum count for K-mers to be assembled</label>
-                                <div class="col-sm-4 indent">
-                                    <input name="min_kmer_cov" id="min_kmer_cov" class="form-control" value="1" />
                                 </div>
                             </div>
 
                             <div class="form-group">
-                                <label class="col-sm-12">
-                                    Abundance estimation method</label>
-                                <div class="col-sm-4 indent">
-                                    <select class="form-control" name="est_method" onchange="estChange(this)">
-                                        <option value="RSEM">RSEM</option>
-                                        <option value="eXpress">eXpress</option>
-                                        <option value="salmon">Salmon</option>
-                                        <option value="kallisto">Kallisto</option>
-                                    </select>
+                                <label class="col-sm-4">Trinity(Trinity 组装参数设置)
+                                    <a onclick="openHelp()"  title="帮助文档" class="helpIcon">
+                                        <i class="fa fa-question-circle-o"></i></a></label>
+                                <div class="col-sm-1">
+                                    <a id="down-1" style="margin-left: 2em">
+                                        <i class="fa fa-arrow-down"></i>
+                                    </a>
+                                    <a id="up-1" style="margin-left: 2em;
+                                        display: none">
+                                        <i class="fa fa-arrow-up"></i>
+                                    </a>
                                 </div>
                             </div>
 
-                            <div class="form-group" id="alnValue">
-                                <label class="col-sm-12 indent-2">
-                                    Alignment method</label>
-                                <div class="col-sm-4 indent-1">
-                                    <select class="form-control" name="aln_method">
-                                        <option value="bowtie">Bowtie</option>
-                                        <option value="bowtie2">Bowtie2</option>
-                                    </select>
+
+                            <div id="set-1" style="display: none;" class="indent">
+                                <div class="form-group">
+                                    <p class="col-sm-12">
+                                        Run in silico normalization of reads</p>
+                                    <div class="col-sm-4 indent">
+                                        <select class="form-control" name="norm">
+                                            <option value="" selected>Yes</option>
+                                            <option value="--no_normalize_reads">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group" >
+                                    <p class="col-sm-12">
+                                        Minimum Contig Length:</p>
+                                    <div class="col-sm-4 indent">
+                                        <input name="min_contig_length" id="min_contig_length" class="form-control" value="350" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group" >
+                                    <p class="col-sm-12">
+                                        Minimum count for K-mers to be assembled</p>
+                                    <div class="col-sm-4 indent">
+                                        <input name="min_kmer_cov" id="min_kmer_cov" class="form-control" value="3" />
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+                            <div class="form-group">
+                                <label class="col-sm-4">Estimate Abundance(定量参数设置):
+                                    <a onclick="openHelp2()"  title="帮助文档" class="helpIcon">
+                                        <i class="fa fa-question-circle-o"></i></a></label>
+                                <div class="col-sm-1">
+                                    <a id="down-2" style="margin-left: 2em">
+                                        <i class="fa fa-arrow-down"></i>
+                                    </a>
+                                    <a id="up-2" style="margin-left: 2em;
+                                        display: none">
+                                        <i class="fa fa-arrow-up"></i>
+                                    </a>
                                 </div>
                             </div>
+
+
+                            <div id="set-2" style="display: none" class="indent">
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">
+                                        Alignment method</p>
+                                    <div class="col-sm-4 indent">
+                                        <select class="form-control" name="aln_method">
+                                            <option value="bowtie">Bowtie</option>
+                                            <option value="bowtie2">Bowtie2</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <p class="col-sm-12">
+                                        Abundance estimation method</p>
+                                    <div class="col-sm-4 indent">
+                                        <select class="form-control" name="est_method" onchange="estChange(this)">
+                                            <option value="RSEM">RSEM</option>
+                                            <option value="eXpress">eXpress</option>
+                                            @* <option value="salmon">Salmon</option>
+                                            <option value="kallisto">Kallisto</option>*@
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
 
                             <div class="form-group" style="display: none;" id="idxValue">
                                 <label class="col-sm-12 indent-2">
@@ -163,8 +202,93 @@
     </div>
 
 
+    <div id="helpShow" class="modal fade modal-margin" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 1000px;">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                    <h4 class="modal-title">
+                        <span id="lblAddTitle" style="font-weight: bold">帮助文档：</span>
+                        <button type="button" class="btn-remove" data-dismiss="modal" ><i class="fa fa-remove"></i></button>
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row-fluid" id="logInfo">
+                        <p class="helpClass">分析模块，利用Trinity程序，对输入多个样品质控后的原始数据进行从头组装，从而得到对应物种的RNA序列信息。</p>
+                        <p class="helpClass">组装步骤如下所示：</p>
+                        <p class="helpClass">
+                            第一步 Inchworm将原始序列建立起一个k-mer graph(K=25)，通过贪婪搜索方法寻找graph中的所有路径，inchworm每搜索到一条路径就当做一条“contig”，最后得到了一组“contig”；</p>
+                        <p class="helpClass">
+                            第二步 Chrysalis，将第一步得到的“contig”进行分组，这时如果所得到的contig中存在(k-1)mer重复片段，或者原始序列中存在一条reads可以跨过不同的contig，这些contig将会被视为来源于同一个基因而被分到一个组中。分组完毕后会对每一组重新建立一个自己的de Bruijn graph 用于后面的组装；</p>
+                        <p class="helpClass">
+                            第三步 Butterfly，遍历Chrysalis生成的graph，修剪掉一些边缘路径，将主要的路径保存下来。butterfly将原始序列与这些路径比对，将原始序列中的主要支持路径保存下来。</p>
+                        <br>
+
+                        <p class="helpClass">
+                            分析模块引用了Trinity-v2.5.1软件包（
+                            <a target="_blank" href="https://github.com/trinityrnaseq/trinityrnaseq/wiki">https://github.com/trinityrnaseq/trinityrnaseq/wiki</a>）。</p>
+                        <br>
+                        <p class="helpClass">相关文献如下所示：</p>
+                        <p class="helpClass">
+                            Grabherr MG, Haas BJ, Yassour M, Levin JZ, Thompson DA, Amit I, Adiconis X, Fan L, Raychowdhury R, Zeng Q, Chen Z, Mauceli E, Hacohen N, Gnirke A, Rhind N, di Palma F, Birren BW, Nusbaum C, Lindblad-Toh K, Friedman N, Regev A. Full-length transcriptome assembly from RNA-seq data without a reference genome. Nat Biotechnol. 2011 May 15;29(7):644-52. doi: 10.1038/nbt.1883. PubMed PMID: 21572440.</p>
+                        <p class="helpClass">
+                            Haas BJ, Papanicolaou A, Yassour M, Grabherr M, Blood PD, Bowden J, Couger MB, Eccles D, Li B, Lieber M, Macmanes MD, Ott M, Orvis J, Pochet N, Strozzi F, Weeks N, Westerman R, William T, Dewey CN, Henschel R, Leduc RD, Friedman N, Regev A. De novo transcript sequence reconstruction from RNA-seq using the Trinity platform for reference generation and analysis. Nat Protoc. 2013 Aug;8(8):1494-512. Open Access in PMC doi: 10.1038/nprot.2013.084. Epub 2013 Jul 11. PubMed PMID:23845962.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="helpShow2" class="modal fade modal-margin" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 1000px;">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                    <h4 class="modal-title">
+                        <span id="lblAddTitle" style="font-weight: bold">帮助文档：</span>
+                        <button type="button" class="btn-remove" data-dismiss="modal" ><i class="fa fa-remove"></i></button>
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row-fluid" id="logInfo">
+                        <p class="helpClass">
+                            分析模块，利用Bowtie/Bowtie2程序，将原始数据比对到Trinity组装结果。接着，利用RSEM/Express程序进行进行表达水平定量分析，从而得到基因的表达量矩阵。</p>
+
+
+                        <p class="helpClass">分析模块引用了Bowtie-1.1.2软件（
+                            <a target="_blank" href="http://bowtie-bio.sourceforge.net/index.shtml">http://bowtie-bio.sourceforge.net/index.shtml</a>）。</p>
+                        <p class="helpClass">
+                            分析模块引用了Bowtie2-2.3.4软件（
+                            <a target="_blank" href="http://bowtie-bio.sourceforge.net/bowtie2/index.shtml">http://bowtie-bio.sourceforge.net/bowtie2/index.shtml</a>）。</p>
+                        <p class="helpClass">分析模块引用了RSEM-1.3.0软件（
+                            <a target="_blank" href="http://deweylab.github.io/RSEM/">http://deweylab.github.io/RSEM/</a>）。</p>
+                        <p class="helpClass">分析模块引用了eXpress-1.5.1软件（
+                            <a target="_blank" href="http://bio.math.berkeley.edu/eXpress/">http://bio.math.berkeley.edu/eXpress/</a>）。</p>
+                        <br>
+                        <p class="helpClass">相关文献如下所示：</p>
+                        <p class="helpClass">
+                            Langmead B, Trapnell C, Pop M, Salzberg SL. Ultrafast and memory-efficient alignment of short DNA sequences to the human genome. Genome Biol 10:R25.</p>
+                        <p class="helpClass">
+                            Langmead B, Salzberg S. Fast gapped-read alignment with Bowtie 2. Nature Methods. 2012, 9:357-359.</p>
+                        <p class="helpClass">
+                            Bo Li and Colin N Dewey. RSEM: accurate transcript quantification from RNA-Seq data with or without a reference genome. BMC Bioinformatics201112:323.</p>
+                        <p class="helpClass">
+                            Roberts A and Pachter L (2012). Streaming fragment assignment for real-time analysis of sequencing experiments. Nature Methods. </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
 
+            function openHelp() {
+                $("#helpShow").modal("show")
+            }
+
+            function openHelp2() {
+                $("#helpShow2").modal("show")
+            }
 
             $("#sample").select2();
 
@@ -205,18 +329,41 @@
                 if (value == "RSEM" || value == "eXpress") {
                     $("#alnValue").show();
                     $("#idxValue").hide();
-                } else if(value == "salmon"){
+                } else if (value == "salmon") {
                     $("#alnValue").hide();
                     $("#idxValue").show();
-                } else{
+                } else {
                     $("#alnValue").hide();
                     $("#idxValue").hide();
                 }
             }
 
 
-            $(function () {
+            $("#down-1").click(function () {
+                $("#set-1").show();
+                $("#down-1").hide();
+                $("#up-1").show()
+            });
 
+            $("#up-1").click(function () {
+                $("#set-1").hide();
+                $("#down-1").show();
+                $("#up-1").hide()
+            });
+
+            $("#down-2").click(function () {
+                $("#set-2").show();
+                $("#down-2").hide();
+                $("#up-2").show()
+            });
+
+            $("#up-2").click(function () {
+                $("#set-2").hide();
+                $("#down-2").show();
+                $("#up-2").hide()
+            });
+
+            $(function () {
 
                 $.ajax({
                     url: "/transcriptome/sample/getAllPESample?proname=@proname",
@@ -289,7 +436,7 @@
                                         // Get the selected options
                                         var options = validator.getFieldElements('sample[]').val();
                                         return (options != null
-                                                && options.length >= 2);
+                                                && options.length >= 1);
                                     }
                                 }
                             }
@@ -297,17 +444,17 @@
                         'sample2[]': {
                             validators: {
                                 callback: {
-                                    message: '请至少选择俩个样品表型！',
+                                    message: '请至少选择一个样品！',
                                     callback: function (value, validator, $field) {
                                         // Get the selected options
                                         var options = validator.getFieldElements('sample2[]').val();
                                         return (options != null
-                                                && options.length >= 2);
+                                                && options.length >= 1);
                                     }
                                 }
                             }
                         },
-                        min_contig_length:{
+                        min_contig_length: {
                             validators: {
                                 notEmpty: {
                                     message: "不能为空！"
