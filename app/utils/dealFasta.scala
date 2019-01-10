@@ -8,11 +8,17 @@ import scala.collection.JavaConverters._
 
 object dealFasta {
 
+  /**
+    * fastq文件转fasta文件
+    * @param fastq
+    * @param fasta
+    */
   def fqToFa(fastq:String,fasta:String) :Unit = {
     val fqFile = FileUtils.readLines(new File(fastq)).asScala
     val fq = fqFile.map(_.replaceAll("@",">")).grouped(4).map(_.take(2).mkString("\n")).mkString("\n")
     FileUtils.writeStringToFile(new File(fasta),fq)
   }
+
 
   def getValidFasta(path:String,outPath:String) : Unit ={
     val fasta = FileUtils.readLines(new File(path)).asScala

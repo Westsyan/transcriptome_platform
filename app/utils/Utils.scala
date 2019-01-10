@@ -91,7 +91,9 @@ object Utils {
 
 
   val windowsPath = "F:/platform/transcriptome_platform"
-  val linuxPath = "/mnt/sdb/platform/transcriptome_platform"
+  //val linuxPath = "/mnt/sdb/platform/transcriptome_platform"
+  val linuxPath = "/home/user/platform/transcriptome_platform"
+
   val path = {
     if (new File(windowsPath).exists()) windowsPath+"/data" else linuxPath+"/data"
   }
